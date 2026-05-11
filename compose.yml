@@ -1,0 +1,11 @@
+services:
+  pdf-service:
+    build: .
+    container_name: wl-pdf-tools
+    ports:
+      - "5000:5000"
+    volumes:
+      # Isso faz os arquivos aparecerem na "Files" do CasaOS
+      - /DATA/AppData/pdf-app/uploads:/app/uploads
+      - /DATA/AppData/pdf-app/converted:/app/converted
+    restart: unless-stopped

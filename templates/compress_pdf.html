@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compactar PDF</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+
+        <a href="/" class="back-button">← Voltar</a>
+
+        <h1>Compactar PDF</h1>
+
+        <p>Reduza o tamanho do seu PDF rapidamente</p>
+
+        <form action="/compress-pdf" method="POST" enctype="multipart/form-data" id="compressForm">
+
+            <div class="drop-zone" id="compressDropZone">
+
+                <input
+                    type="file"
+                    id="compressInput"
+                    name="pdf"
+                    accept=".pdf"
+                    hidden
+                >
+
+                <p>Arraste seu PDF aqui</p>
+
+                <span>ou clique para selecionar</span>
+
+            </div>
+
+            <div id="compressFileList"></div>
+
+            <button type="submit" id="compressButton">
+                Compactar PDF
+            </button>
+
+            <div id="loadingBox" class="loading-box">
+
+                <div class="spinner"></div>
+
+                <span>Compactando PDF...</span>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <script>
+
+        const compressDropZone = document.getElementById('compressDropZone');
+        const compressInput = document.getElementById('compressInput');
+        const compressFileList = document.getElementById('compressFileList');
+        const compressForm = document.getElementById('compressForm');
+
+        compressDropZone.addEventListener('click', () => {
+            compressInput.click();
+        });
+
+        compressDropZone.addEventListener('dragover', (e) => {
+
+            e.preventDefault();
+
+            compressDropZone.classList.add('dragover');
+        });
+
+        compressDropZone.addEventListener('dragleave', () => {
+
+            compressDropZone.classList.remove('dragover');
+        });
+
+        compressDropZone.addEventListener('drop', (e) => {
+
+            e.preventDefault();
+
+            compressDropZone.classList.remove('dragover');
+
+            compressInput.files = e.dataTransfer.files;
+
+            showCompressFile();
+        });
+
+        compressInput.addEventListener('change', showCompressFile);
+
+        function showCompressFile(){
+
+            compressFileList.innerHTML = '';
+
+            if(compressInput.files.length > 0){
+
+                const div = document.createElement('div');
+
+                div.classList.add('file-item');
+
+                div.textContent = compressInput.files[0].name;
+
+                compressFileList.appendChild(div);
+            }
+        }
+
+        compressForm.addEventListener('submit', (e) => {
+
+            if(compressInput.files.length === 0){
+
+                e.preventDefault();
+
+                alert('Selecione um PDF.');
+            }
+            
+        });
+
+
+        const loadingBox = document.getElementById('loadingBox');
+        const compressButton = document.getElementById('compressButton');
+
+            compressForm.addEventListener('submit', () => {
+
+            compressButton.disabled = true;
+
+            compressButton.innerText = 'Processando...';
+
+            loadingBox.style.display = 'flex';
+
+            setTimeout(() => {
+
+                loadingBox.innerHTML = `
+                    <span style="color:#22c55e; font-size:18px;">
+                        ✓ Download concluído
+                    </span>
+                `;
+
+            }, 2500);
+
+            setTimeout(() => {
+
+                compressButton.disabled = false;
+
+                compressButton.innerText = 'Compactar PDF';
+
+                loadingBox.style.display = 'none';
+
+                loadingBox.innerHTML = `
+                    <div class="spinner"></div>
+                    <span>Compactando PDF...</span>
+                `;
+
+            }, 5000);
+        });
+
+    </script>
+
+</body>
+</html>

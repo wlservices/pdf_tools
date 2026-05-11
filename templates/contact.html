@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contato - WL Converter</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+
+        <div class="logo">
+            WL Converter
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">Início</a>
+
+            <a href="/#tools">Ferramentas</a>
+
+            <a href="/contact">Contato</a>
+
+        </div>
+
+    </nav>
+
+    <div class="container">
+
+        <h1>Contato</h1>
+
+        <p>
+            Envie sugestões, dúvidas ou feedback sobre a plataforma.
+        </p>
+
+        <form class="contact-form">
+
+            <input type="text"
+                   placeholder="Seu nome"
+                   required>
+
+            <input type="email"
+                   placeholder="Seu email"
+                   required>
+
+            <textarea placeholder="Sua mensagem"
+                      rows="6"
+                      required></textarea>
+
+            <button type="submit">
+                Enviar mensagem
+            </button>
+
+        </form>
+
+    </div>
+
+</body>
+</html>

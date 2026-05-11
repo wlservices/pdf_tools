@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConvertFast</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+
+        <div class="logo">
+            WL Converter
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">Início</a>
+
+            <a href="#tools">Ferramentas</a>
+
+            <a href="/contact">Contato</a>
+
+        </div>
+
+    </nav>
+
+    <div class="container" id="tools">
+
+        <h1>Conversor de Arquivos</h1>
+
+        <p>Ferramentas rápidas para PDF e arquivos</p>
+
+        <div class="tools-grid">
+
+            <a href="/merge-pdf-page" class="tool-card">
+
+                <h2>Juntar PDF</h2>
+
+                <span>Combine múltiplos PDFs em um único arquivo</span>
+
+            </a>
+
+            <div class="tool-card disabled">
+
+                <h2>PDF → Word</h2>
+
+                <span>Em breve</span>
+
+            </div>
+
+            <a href="/word-to-pdf-page" class="tool-card">
+
+                <h2>Word → PDF</h2>
+
+                <p>Converta arquivos Word em PDF</p>
+
+            </a>
+
+            <a href="/image-to-pdf-page" class="tool-card">
+
+                <h2>Imagem → PDF</h2>
+
+                <p>Converta imagens em um único PDF</p>
+
+            </a>
+
+            <a href="/compress-pdf-page" class="tool-card">
+
+                <h2>Compactar PDF</h2>
+
+                <span>Reduza o tamanho dos arquivos PDF</span>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

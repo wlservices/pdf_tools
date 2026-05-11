@@ -1,0 +1,19 @@
+INSTRUÇÕES DE INSTALAÇÃO DO SISTEMA DE CONVERSÃO
+
+1. DEPENDÊNCIAS PYTHON:
+No terminal do seu servidor, execute:
+pip install -r requirements.txt
+
+2. DEPENDÊNCIAS DO SISTEMA (ESSENCIAL):
+O sistema utiliza ferramentas externas para conversão. Se o seu servidor for Linux (Ubuntu/Debian), você deve instalar:
+
+sudo apt-get update
+sudo apt-get install -y ghostscript libreoffice
+
+* Se você estiver em uma hospedagem compartilhada (como cPanel/Hostgator), talvez precise solicitar ao suporte a instalação do Ghostscript e LibreOffice, ou verificar se eles já estão disponíveis.
+
+3. PASTAS DE ARQUIVOS:
+O código cria automaticamente as pastas 'uploads' e 'converted', mas certifique-se de que o usuário que roda o Python tem permissão para escrever no diretório do projeto.
+
+
+4. O sistema consulta a cada 5 minutos as pastas 'converted' e 'uploads' e apaga os arquivos que estão por mais de 10 minutos.

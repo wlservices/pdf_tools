@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word para PDF</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+
+        <a href="/" class="back-button">← Voltar</a>
+
+        <h1>Word para PDF</h1>
+
+        <p>Converta arquivos DOCX para PDF rapidamente</p>
+
+        <form action="/word-to-pdf"
+              method="POST"
+              enctype="multipart/form-data"
+              id="uploadForm">
+
+            <div class="drop-zone" id="dropZone">
+
+                <input type="file"
+                       id="fileInput"
+                       name="document"
+                       accept=".doc,.docx,.odt"
+                       hidden>
+
+                <p>Arraste o arquivo Word aqui</p>
+                <span>ou clique para selecionar</span>
+
+            </div>
+
+            <div id="fileList"></div>
+
+            <button type="submit">
+                Converter para PDF
+            </button>
+
+        </form>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
