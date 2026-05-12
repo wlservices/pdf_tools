@@ -1,0 +1,14 @@
+<div id="meu-modal" class="modal-erro">
+    <div class="modal-conteudo">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <p class="menssage-error">{{ message }}</p>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        <!-- Botão limpa a URL e fecha o modal -->
+        <a href="/contact" class="btn-ok">Tentar Novamente</a>
+    </div>
+</div>

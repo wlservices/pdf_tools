@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contato - WL Converter</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5277367888683216" crossorigin="anonymous"></script>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/favicion.svg')}}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/favicon.ico')}}" type="image/x-icon">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -36,19 +36,20 @@
             Envie sugestões, dúvidas ou feedback sobre a plataforma.
         </p>
 
-        <form class="contact-form">
+        <form action="/contact" class="contact-form"  method="POST">
 
             <input type="text"
                    placeholder="Seu nome"
-                   required>
+                   required name="nome">
 
             <input type="email"
                    placeholder="Seu email"
-                   required>
+                   required name="email">
 
             <textarea placeholder="Sua mensagem"
                       rows="6"
-                      required></textarea>
+                      required name="mensagem">
+            </textarea>
 
             <button type="submit">
                 Enviar mensagem

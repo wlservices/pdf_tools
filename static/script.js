@@ -7,6 +7,11 @@ const progressBar = document.getElementById('progressBar');
 const statusText = document.getElementById('statusText');
 const submitBtn = document.getElementById('submitBtn');
 
+function closeModal() {
+    modal.style.display = 'none';
+    photoInput.value = ""; 
+};
+
 let currentFiles = [];
 
 if (dropZone) {

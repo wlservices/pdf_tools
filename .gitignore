@@ -48,7 +48,7 @@ vscode/
 # mypy
 mypy_cache/
 # Environments
-env
+.env
 venv
 # macOS specific files
 DS_Store

@@ -5,8 +5,10 @@ from database import init_db, log_access, log_tool_usage, get_stats, get_db_conn
 from pypdf import PdfWriter
 from PIL import Image
 from pdf2docx import Converter
+from flask_mail import Mail, Message
 import pdfplumber
 import pandas as pd
+from dotenv import load_dotenv
 
 import os
 import uuid
@@ -15,11 +17,24 @@ import threading
 import time
 import logging
 
+
+load_dotenv()
+
 # Configuração de logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-app.secret_key = 'wlpdftools_secret_key_change_this' # Chave secreta para sessões
+app.secret_key = os.getenv("SECRET_KEY")
+
+# Configurações de Email
+app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
+app.config['MAIL_PORT'] = os.getenv("MAIL_PORT")
+app.config['MAIL_USE_SSL']=os.getenv("MAIL_USE_SSL")
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+
+mail = Mail(app)
 
 # Inicializa o banco de dados ao iniciar o app
 with app.app_context():
@@ -391,10 +406,33 @@ def pdf_to_excel_page():
         except Exception as e:
             logging.error(f"Erro em pdf_to_excel: {e}")
             return f"Erro interno: {str(e)}", 500
+        
     return render_template('pdf_to_excel.html')
 
-@app.route('/contact')
+@app.route('/contact', methods=["GET", "POST"])
 def contact_page():
+    if request.method == "POST":
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        mensagem = request.form.get('mensagem')
+
+        msg = Message(
+            subject=f"Novo Contato: {nome} (PDF Tools)",
+            sender=os.getenv("MAIL_USERNAME"),
+            recipients=[os.getenv("MAIL_USERNAME")],
+            reply_to=email
+        )
+        
+        msg.body = f"Nome: {nome}\nEmail: {email}\nMenssagem: {mensagem}"
+
+        try:
+            mail.send(msg)
+            flash('Email enviado com sucesso')
+            return redirect(url_for("contact_page") + "#meu-modal")
+        except Exception as e:
+            flash(f"Erro no envio: {str(e)}")
+            return redirect(url_for("contact_page") + "#meu-modal")
+
     return render_template('contact.html')
 
 @app.route('/admin/login', methods=['GET', 'POST'])
