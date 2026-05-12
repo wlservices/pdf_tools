@@ -1,6 +1,12 @@
-from flask import Flask, render_template, request, send_file, abort
+from flask import Flask, render_template, request, send_file, abort, redirect, url_for, session, flash
+from functools import wraps
+from werkzeug.security import check_password_hash, generate_password_hash
+from database import init_db, log_access, log_tool_usage, get_stats, get_db_connection, update_admin_password
 from pypdf import PdfWriter
 from PIL import Image
+from pdf2docx import Converter
+import pdfplumber
+import pandas as pd
 
 import os
 import uuid
@@ -13,6 +19,25 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
+app.secret_key = 'wlpdftools_secret_key_change_this' # Chave secreta para sessões
+
+# Inicializa o banco de dados ao iniciar o app
+with app.app_context():
+    init_db()
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'admin_logged_in' not in session:
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.before_request
+def track_access():
+    # Não logar acessos a arquivos estáticos ou rotas de admin para não poluir
+    if not request.path.startswith('/static') and not request.path.startswith('/admin'):
+        log_access(request.remote_addr, request.user_agent.string, request.path)
 
 # Usar caminhos absolutos para evitar erros em diferentes ambientes de hospedagem
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -76,6 +101,14 @@ def word_to_pdf_page():
 def image_to_pdf_page():
     return render_template('image_to_pdf.html')
 
+@app.route('/pdf-to-word-page')
+def pdf_to_word_page():
+    return render_template('pdf_to_word.html')
+
+@app.route('/pdf-to-excel-page')
+def pdf_to_excel_page():
+    return render_template('pdf_to_excel.html')
+
 @app.route('/contact')
 def contact_page():
     return render_template('contact.html')
@@ -83,6 +116,7 @@ def contact_page():
 @app.route('/merge-pdf', methods=['POST'])
 def merge_pdf():
     try:
+        log_tool_usage('Merge PDF', request.remote_addr)
         files = request.files.getlist('pdfs')
         if not files or files[0].filename == '':
             return "Nenhum PDF enviado.", 400
@@ -119,6 +153,7 @@ def merge_pdf():
 @app.route('/compress-pdf', methods=['POST'])
 def compress_pdf():
     try:
+        log_tool_usage('Compress PDF', request.remote_addr)
         file = request.files.get('pdf')
         if not file or file.filename == '':
             return "Nenhum PDF enviado.", 400
@@ -179,6 +214,7 @@ def compress_pdf():
 @app.route('/word-to-pdf', methods=['POST'])
 def word_to_pdf():
     try:
+        log_tool_usage('Word to PDF', request.remote_addr)
         file = request.files.get('document')
         if not file or file.filename == '':
             return "Nenhum arquivo enviado.", 400
@@ -238,6 +274,7 @@ def word_to_pdf():
 @app.route('/image-to-pdf', methods=['POST'])
 def image_to_pdf():
     try:
+        log_tool_usage('Image to PDF', request.remote_addr)
         files = request.files.getlist('images')
         if not files or files[0].filename == '':
             return "Nenhuma imagem enviada.", 400
@@ -267,6 +304,166 @@ def image_to_pdf():
     except Exception as e:
         logging.error(f"Erro em image_to_pdf: {e}")
         return f"Erro interno: {str(e)}", 500
+
+@app.route('/pdf-to-word', methods=['POST'])
+def pdf_to_word():
+    try:
+        log_tool_usage('PDF to Word', request.remote_addr)
+        file = request.files.get('pdf')
+        if not file or file.filename == '':
+            return "Nenhum PDF enviado.", 400
+
+        input_filename = f"{uuid.uuid4()}.pdf"
+        input_path = os.path.join(UPLOAD_FOLDER, input_filename)
+        file.save(input_path)
+
+        output_filename = f"converted_{uuid.uuid4()}.docx"
+        output_path = os.path.join(CONVERTED_FOLDER, output_filename)
+
+        # Conversão PDF para Word
+        cv = Converter(input_path)
+        cv.convert(output_path, start=0, end=None)
+        cv.close()
+
+        if not os.path.exists(output_path):
+            return "Erro ao gerar arquivo Word.", 500
+
+        return send_file(output_path, as_attachment=True)
+    except Exception as e:
+        logging.error(f"Erro em pdf_to_word: {e}")
+        return f"Erro interno: {str(e)}", 500
+
+@app.route('/pdf-to-excel', methods=['POST'])
+def pdf_to_excel():
+    try:
+        log_tool_usage('PDF to Excel', request.remote_addr)
+        file = request.files.get('pdf')
+        if not file or file.filename == '':
+            return "Nenhum PDF enviado.", 400
+
+        input_filename = f"{uuid.uuid4()}.pdf"
+        input_path = os.path.join(UPLOAD_FOLDER, input_filename)
+        file.save(input_path)
+
+        output_filename = f"converted_{uuid.uuid4()}.xlsx"
+        output_path = os.path.join(CONVERTED_FOLDER, output_filename)
+
+        all_tables = []
+        with pdfplumber.open(input_path) as pdf:
+            for i, page in enumerate(pdf.pages):
+                # Tenta extrair tabelas com configurações mais flexíveis
+                tables = page.extract_tables({
+                    "vertical_strategy": "lines", 
+                    "horizontal_strategy": "lines",
+                    "snap_tolerance": 3,
+                })
+                
+                # Se não encontrar com 'lines', tenta com 'text'
+                if not tables:
+                    tables = page.extract_tables({
+                        "vertical_strategy": "text",
+                        "horizontal_strategy": "text",
+                    })
+
+                for table in tables:
+                    if table and len(table) > 0:
+                        # Limpa dados nulos ou vazios para evitar erros no DataFrame
+                        cleaned_table = [[cell if cell is not None else "" for cell in row] for row in table]
+                        
+                        if len(cleaned_table) > 1:
+                            df = pd.DataFrame(cleaned_table[1:], columns=cleaned_table[0])
+                        else:
+                            df = pd.DataFrame(cleaned_table)
+                        
+                        all_tables.append(df)
+
+        if not all_tables:
+            # Se ainda não encontrar tabelas, tenta extrair o texto bruto por página como fallback
+            with pdfplumber.open(input_path) as pdf:
+                for i, page in enumerate(pdf.pages):
+                    text = page.extract_text()
+                    if text:
+                        lines = [line.split() for line in text.split('\n') if line.strip()]
+                        if lines:
+                            all_tables.append(pd.DataFrame(lines))
+
+        if not all_tables:
+            return "Não foi possível extrair dados deste PDF. Verifique se ele contém texto ou tabelas.", 400
+
+        # Salva em Excel tratando possíveis erros de nomes de abas
+        with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
+            for i, df in enumerate(all_tables):
+                sheet_name = f'Pagina_{i+1}'[:31] # Limite de 31 caracteres do Excel
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+        if not os.path.exists(output_path):
+            return "Erro ao gerar arquivo Excel.", 500
+
+        return send_file(output_path, as_attachment=True)
+    except Exception as e:
+        logging.error(f"Erro em pdf_to_excel: {e}")
+        return f"Erro interno: {str(e)}", 500
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        conn = get_db_connection()
+        admin = conn.execute('SELECT * FROM admins WHERE username = ?', (username,)).fetchone()
+        conn.close()
+        
+        if admin and check_password_hash(admin['password_hash'], password):
+            session['admin_logged_in'] = True
+            session['admin_user'] = username
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Usuário ou senha incorretos.')
+            
+    return render_template('admin_login.html')
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    stats = get_stats(start_date, end_date)
+    return render_template('admin_dashboard.html', stats=stats, start_date=start_date, end_date=end_date)
+
+@app.route('/admin/change-password', methods=['GET', 'POST'])
+@admin_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password != confirm_password:
+            flash('As novas senhas não coincidem.')
+            return render_template('change_password.html')
+            
+        username = session['admin_user']
+        conn = get_db_connection()
+        admin = conn.execute('SELECT * FROM admins WHERE username = ?', (username,)).fetchone()
+        conn.close()
+        
+        if admin and check_password_hash(admin['password_hash'], current_password):
+            new_hash = generate_password_hash(new_password)
+            update_admin_password(username, new_hash)
+            flash('Senha alterada com sucesso!')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Senha atual incorreta.')
+            
+    return render_template('change_password.html')
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    session.pop('admin_user', None)
+    return redirect(url_for('admin_login'))
 
 if __name__ == '__main__':
     # Em produção, use um servidor WSGI como Gunicorn

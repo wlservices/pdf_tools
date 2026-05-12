@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrativo - WL Converter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5277367888683216" crossorigin="anonymous"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">WL Converter Admin</div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Ver Site</a>
+            <a href="{{ url_for('change_password') }}">Trocar Senha</a>
+            <a href="{{ url_for('admin_logout') }}" style="color: #ef4444;">Sair</a>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <div class="header-flex">
+            <h1>Dashboard</h1>
+            <p>Bem-vindo, {{ session['admin_user'] }}</p>
+        </div>
+
+        <form class="filter-bar" method="GET">
+            <div class="filter-group">
+                <label>Data Início</label>
+                <input type="date" name="start_date" value="{{ start_date or '' }}">
+            </div>
+            <div class="filter-group">
+                <label>Data Fim</label>
+                <input type="date" name="end_date" value="{{ end_date or '' }}">
+            </div>
+            <button type="submit">Filtrar</button>
+            {% if start_date or end_date %}
+                <a href="{{ url_for('admin_dashboard') }}" class="clear-filter">Limpar Filtros</a>
+            {% endif %}
+        </form>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total de Acessos</h3>
+                <div class="value">{{ stats.total_accesses }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Ferramenta Mais Usada</h3>
+                <div class="value">
+                    {% if stats.tool_stats %}
+                        {{ stats.tool_stats[0].tool_name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>IPs Únicos</h3>
+                <div class="value">{{ stats.top_ips|length }}</div>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>Uso de Ferramentas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ferramenta</th>
+                        <th>Quantidade de Usos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tool in stats.tool_stats %}
+                    <tr>
+                        <td>{{ tool.tool_name }}</td>
+                        <td>{{ tool.count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>IPs que mais acessaram</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endereço IP</th>
+                        <th>Total de Acessos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ip in stats.top_ips %}
+                    <tr>
+                        <td>{{ ip.ip_address }}</td>
+                        <td>{{ ip.count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>Acessos Recentes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>IP</th>
+                        <th>Rota</th>
+                        <th>User Agent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for access in stats.recent_accesses %}
+                    <tr>
+                        <td>{{ access.timestamp }}</td>
+                        <td>{{ access.ip_address }}</td>
+                        <td>{{ access.path }}</td>
+                        <td style="font-size: 12px; color: #94a3b8;">{{ access.user_agent[:50] }}...</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

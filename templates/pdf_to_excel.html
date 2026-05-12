@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WL Converter - PDF para Excel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5277367888683216" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">WL Converter</div>
+        <div class="nav-links">
+            <a href="/">Início</a>
+            <a href="/contact">Contato</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <a href="/" class="back-button">← Voltar</a>
+        <h1>PDF para Excel</h1>
+        <p>Extraia tabelas de arquivos PDF para planilhas Excel (.xlsx)</p>
+
+        <form id="uploadForm" action="/pdf-to-excel" method="POST" enctype="multipart/form-data">
+            <div class="drop-zone" id="dropZone">
+                <p>Arraste seu PDF aqui ou clique para selecionar</p>
+                <span>Apenas arquivos .pdf</span>
+                <input type="file" name="pdf" id="fileInput" accept=".pdf" hidden required>
+            </div>
+            
+            <div id="fileList"></div>
+
+            <div class="loading-box" id="loadingBox">
+                <div class="spinner"></div>
+                <p id="statusText">Extraindo tabelas...</p>
+                <div class="progress-container" style="width: 100%; background: #1e293b; border-radius: 10px; height: 10px; margin-top: 10px;">
+                    <div id="progressBar" style="width: 0%; background: #2563eb; height: 100%; border-radius: 10px; transition: width 0.3s;"></div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">Converter para Excel</button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
