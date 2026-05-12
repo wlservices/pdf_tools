@@ -52,3 +52,5 @@ env
 venv
 # macOS specific files
 DS_Store
+#db
+*.db

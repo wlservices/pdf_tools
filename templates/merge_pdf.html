@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juntar PDF</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5277367888683216" crossorigin="anonymous"></script>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/favicion.svg')}}" type="image/x-icon">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -18,27 +17,22 @@
 
         <p>Combine múltiplos PDFs rapidamente</p>
 
-        <form action="/merge-pdf" method="POST" enctype="multipart/form-data" id="uploadForm">
+        <form id="uploadForm" action="/merge-pdf-page" method="POST" enctype="multipart/form-data">
 
             <div class="drop-zone" id="dropZone">
-
-                <input type="file"
-                       id="fileInput"
-                       name="pdfs"
-                       multiple
-                       accept=".pdf"
-                       hidden>
-
                 <p>Arraste PDFs aqui</p>
                 <span>ou clique para selecionar</span>
-
+                <input type="file" id="fileInput" name="pdfs" multiple accept=".pdf" hidden required>
             </div>
 
             <div id="fileList"></div>
 
-            <button type="submit">
-                Juntar PDFs
-            </button>
+            <div class="loading-box" id="loadingBox">
+                <div class="spinner"></div>
+                <span>Mesclando PDF...</span>
+            </div>
+
+            <button type="submit" id="submitBtn">Juntar PDFs</button>
 
         </form>
 

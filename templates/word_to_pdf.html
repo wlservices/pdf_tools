@@ -18,7 +18,7 @@
 
         <p>Converta arquivos DOCX para PDF rapidamente</p>
 
-        <form action="/word-to-pdf"
+        <form action="/word-to-pdf-page"
               method="POST"
               enctype="multipart/form-data"
               id="uploadForm">
@@ -38,7 +38,15 @@
 
             <div id="fileList"></div>
 
-            <button type="submit">
+            <div class="loading-box" id="loadingBox">
+                <div class="spinner"></div>
+                <p id="statusText">Convertendo arquivo...</p>
+                <div class="progress-container" style="width: 100%; background: #1e293b; border-radius: 10px; height: 10px; margin-top: 10px;">
+                    <div id="progressBar" style="width: 0%; background: #2563eb; height: 100%; border-radius: 10px; transition: width 0.3s;"></div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">
                 Converter para PDF
             </button>
 

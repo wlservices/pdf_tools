@@ -6,7 +6,7 @@
     <title>WL Converter - PDF para Excel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5277367888683216" crossorigin="anonymous"></script>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/favicion.svg')}}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/favicon.ico')}}" type="image/x-icon">
 </head>
 <body>
     <nav class="navbar">
@@ -22,7 +22,7 @@
         <h1>PDF para Excel</h1>
         <p>Extraia tabelas de arquivos PDF para planilhas Excel (.xlsx)</p>
 
-        <form id="uploadForm" action="/pdf-to-excel" method="POST" enctype="multipart/form-data">
+        <form id="uploadForm" action="/pdf-to-excel-page" method="POST" enctype="multipart/form-data">
             <div class="drop-zone" id="dropZone">
                 <p>Arraste seu PDF aqui ou clique para selecionar</p>
                 <span>Apenas arquivos .pdf</span>
