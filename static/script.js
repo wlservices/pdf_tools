@@ -6,11 +6,9 @@ const loadingBox = document.getElementById('loadingBox');
 const progressBar = document.getElementById('progressBar');
 const statusText = document.getElementById('statusText');
 const submitBtn = document.getElementById('submitBtn');
-
-function closeModal() {
-    modal.style.display = 'none';
-    photoInput.value = ""; 
-};
+const sendEmailBtn = document.getElementById('sendEmailBtn');
+const btnCloseModal = document.getElementById('btnCloseModal');
+const modal = document.getElementById('meu-modal');
 
 let currentFiles = [];
 

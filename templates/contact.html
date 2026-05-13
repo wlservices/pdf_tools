@@ -10,6 +10,8 @@
 </head>
 <body>
 
+    {% include 'includes/_modal.html' %}
+
     <nav class="navbar">
 
         <div class="logo">
@@ -38,26 +40,19 @@
 
         <form action="/contact" class="contact-form"  method="POST">
 
-            <input type="text"
-                   placeholder="Seu nome"
-                   required name="nome">
+            <input type="text" placeholder="Seu nome" required name="nome">
 
-            <input type="email"
-                   placeholder="Seu email"
-                   required name="email">
+            <input type="email" placeholder="Seu email" required name="email">
 
-            <textarea placeholder="Sua mensagem"
-                      rows="6"
-                      required name="mensagem">
-            </textarea>
+            <textarea placeholder="Sua mensagem" rows="6" required name="mensagem"></textarea>
 
-            <button type="submit">
-                Enviar mensagem
-            </button>
+            <button id="sendEmailBtn" type="submit"> Enviar mensagem </button>
 
         </form>
 
     </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 </html>

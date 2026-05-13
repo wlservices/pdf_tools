@@ -428,10 +428,10 @@ def contact_page():
         try:
             mail.send(msg)
             flash('Email enviado com sucesso')
-            return redirect(url_for("contact_page") + "#meu-modal")
+            return redirect(url_for("contact_page") + '#meu-modal')
         except Exception as e:
             flash(f"Erro no envio: {str(e)}")
-            return redirect(url_for("contact_page") + "#meu-modal")
+            return redirect(url_for("contact_page") + '#meu-modal')
 
     return render_template('contact.html')
 
