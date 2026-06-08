@@ -55,3 +55,4 @@ DS_Store
 #db
 *.db
 docker.md
+compose.prod.yml
