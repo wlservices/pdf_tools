@@ -1,11 +1,75 @@
 services:
   pdf-service:
     build: .
-    container_name: wl-pdf-tools
+    image: wlservices/pdf-tools:latest
+    container_name: wl-converter
+    mem_limit: 2g
     ports:
       - "5000:5000"
+    networks:
+      - pdf-network
     volumes:
-      # Isso faz os arquivos aparecerem na "Files" do CasaOS
       - /DATA/AppData/pdf-app/uploads:/app/uploads
       - /DATA/AppData/pdf-app/converted:/app/converted
+      - /DATA/AppData/pdf-app/logs:/app/logs
+      - /DATA/AppData/pdf-app/temp:/app/temp
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - pdf-service
+    networks:
+      - pdf-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - /DATA/AppData/pdf-app/redis:/data
+    networks:
+      - pdf-network
+
+  watchtower:
+    image: containrrr/watchtower:latest-dev
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 3600 --cleanup --api-version "1.40"
+    networks:
+      - pdf-network
+  
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - /DATA/AppData/pdf-app/uptime-kuma:/app/data
+    networks:
+      - pdf-network
+
+networks:
+  pdf-network:
+    driver: bridge

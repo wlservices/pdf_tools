@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, send_file, abort, redirect, url_for, session, flash
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
-from database import init_db, log_access, log_tool_usage, get_stats, get_db_connection, update_admin_password
+from data.database import init_db, log_access, log_tool_usage, get_stats, get_db_connection, update_admin_password
 from pypdf import PdfWriter
 from PIL import Image
 from pdf2docx import Converter
@@ -497,5 +497,4 @@ def admin_logout():
     return redirect(url_for('admin_login'))
 
 if __name__ == '__main__':
-    # Em produção, use um servidor WSGI como Gunicorn
     app.run(debug=True, host='0.0.0.0', port=5000)

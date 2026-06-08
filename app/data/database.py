@@ -49,7 +49,7 @@ def init_db():
     if not cursor.fetchone():
         # Senha padrão: admin123 (o usuário deve ser orientado a mudar depois)
         password_hash = generate_password_hash('admin123')
-        cursor.execute("INSERT INTO admins (username, password_hash) VALUES (?, ?)", ('admin', password_hash))
+        cursor.execute("INSERT OR IGNORE INTO admins (username, password_hash) VALUES (?, ?)", ('admin', password_hash))
     
     conn.commit()
     conn.close()

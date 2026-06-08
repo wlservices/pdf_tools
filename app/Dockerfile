@@ -7,6 +7,7 @@ ENV PYTHONUNBUFFERED 1
 
 # Instala dependências do sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
+  curl \
   ghostscript \
   libreoffice \
   # Dependências comuns para renderização e PDF
@@ -29,7 +30,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Cria as pastas que o seu código usa para upload e conversão
-RUN mkdir -p uploads converted
+RUN mkdir -p uploads converted temp logs
 
 # Comando para rodar a aplicação (ajuste para o seu arquivo principal)
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--workers=4", "--threads=2", "--timeout=300", "--bind=0.0.0.0:5000", "app:app"]
